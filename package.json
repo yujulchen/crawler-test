@@ -1,0 +1,16 @@
+{
+  "name": "ex_crawler",
+  "version": "1.0.0",
+  "description": "class about crawler",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "YU",
+  "license": "ISC",
+  "dependencies": {
+    "jquery": "^3.5.1",
+    "jsdom": "^16.4.0",
+    "nightmare": "^3.0.2"
+  }
+}
