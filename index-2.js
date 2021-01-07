@@ -73,13 +73,14 @@ async function getData () {
         const data2 = await parseDetail(data[i].href);
 
         arrLink[i]["pics"] = data2.pics;
+
+        arrLink[i]["productSpec"] = data2.productSpec;
+
+        await writeJson();
     }
-
-    await writeJson();
-
 }
 
-// TODO:
+// TODO: 圖片只會抓到第一張
 async function parseDetail (url) {
     console.log('url', url);
 
@@ -92,22 +93,41 @@ async function parseDetail (url) {
         return document.documentElement.innerHTML;
     })
 
-    let totalPics = $(html).find(".slick-list>.slick-track>.Carousel__ImgContainer-sc-17ibooh-4>img").length;
+    let totalPics = $(html).find(".slick-list>.slick-track>.Carousel__ImgContainer-sc-17ibooh-4").length;
     console.log("totalPics", totalPics);
 
     for (i=0; i <= totalPics; i++){
+        // let picsArray = [];
+        // await nightmare.wait(500);
+
         let html2 = await nightmare.evaluate(()=>{
             return document.documentElement.innerHTML;
         })
 
-
         if ($(html2).find(".Carousel__ProductSlideImg-sc-17ibooh-5").attr('src') != undefined){
         picsArray.push($(html2).find(".Carousel__ProductSlideImg-sc-17ibooh-5").attr('src'))
-        console.log('picsArray', picsArray);
+        console.log('picsArray', picsArray[i]);
         }
     }
 
     allData["pics"] = picsArray;
+
+    await scrollPage();
+
+    html = await nightmare.evaluate(()=>{
+        return document.documentElement.innerHTML;
+    })
+
+    let productSpec = {};
+
+    let allProductSpec = $(html).find("#detailCkeditor > ul > li")
+
+    allProductSpec.each(function(index, element){
+        productSpec[$(this).find('strong').text()] = $(this).text();
+    })
+
+    allData["productSpec"] = productSpec;
+    // console.log('productSpec', productSpec)
 
     console.log('allData', allData);
 
@@ -118,6 +138,16 @@ async function scrollPage(){
     console.log('scrollPage');
 
     let currentHeight = 0;
+    let offset = 0;
+
+    while(offset <= currentHeight){
+        currentHeight = await nightmare.evaluate(()=>{
+            return document.documentElement.scrollHeight;
+        })
+
+        offset += 500;
+        await nightmare.scrollTo(offset, 0).wait(500);
+    }
 }
 
 
