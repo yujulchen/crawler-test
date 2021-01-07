@@ -71,7 +71,12 @@ async function getData () {
 
     for (let i = 0; i < data.length; i++) {
         const data2 = await parseDetail(data[i].href);
+
+        arrLink[i]["pics"] = data2.pics;
     }
+
+    await writeJson();
+
 }
 
 // TODO:
@@ -107,6 +112,12 @@ async function parseDetail (url) {
     console.log('allData', allData);
 
     return allData;
+}
+
+async function scrollPage(){
+    console.log('scrollPage');
+
+    let currentHeight = 0;
 }
 
 
