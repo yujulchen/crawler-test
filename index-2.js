@@ -160,6 +160,7 @@ async function scrollPage(){
     }
 }
 
+// TODO: 資料夾已建立，圖片無法下載
 async function downloadImgs(){
     let data = JSON.parse(await readFile("output/activity.json"))
     // console.log('data', data);
