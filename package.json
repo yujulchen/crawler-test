@@ -9,6 +9,7 @@
   "author": "YU",
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.21.1",
     "jquery": "^3.5.1",
     "jsdom": "^16.4.0",
     "nightmare": "^3.0.2"

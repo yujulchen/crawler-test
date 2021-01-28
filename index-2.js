@@ -7,9 +7,16 @@ const $ = require("jquery")(window);
 
 const util = require('util');
 const fs = require('fs');
+const { stringify } = require('querystring');
 const mkdir = util.promisify(fs.mkdir);
 const readFile = util.promisify(fs.readFile);
 const writeFile = util.promisify(fs.writeFile);
+
+const axios = require('axios');
+const { resolve } = require('path');
+const { rejects } = require('assert');
+const { resolve4 } = require('dns');
+const { url } = require('inspector');
 
 let arrLink = [];
 
@@ -80,7 +87,6 @@ async function getData () {
     }
 }
 
-// TODO: 圖片只會抓到第一張
 async function parseDetail (url) {
     console.log('url', url);
 
@@ -95,7 +101,7 @@ async function parseDetail (url) {
 
     let totalPics = $(html).find(".slick-list>.slick-track>.Carousel__ImgContainer-sc-17ibooh-4").length;
     console.log("totalPics", totalPics);
-
+    
     for (i=0; i <= totalPics; i++){
         // let picsArray = [];
         // await nightmare.wait(500);
@@ -104,9 +110,13 @@ async function parseDetail (url) {
             return document.documentElement.innerHTML;
         })
 
-        if ($(html2).find(".Carousel__ProductSlideImg-sc-17ibooh-5").attr('src') != undefined){
-        picsArray.push($(html2).find(".Carousel__ProductSlideImg-sc-17ibooh-5").attr('src'))
-        console.log('picsArray', picsArray[i]);
+        let picsInside = $(html2).find(".Carousel__ProductSlideImg-sc-17ibooh-5").eq(i).attr('src');
+        console.log('picsInside', picsInside)
+
+
+        if (picsInside != undefined){
+        picsArray.push(picsInside)
+        console.log('picsArray', picsArray);
         }
     }
 
@@ -150,6 +160,42 @@ async function scrollPage(){
     }
 }
 
+async function downloadImgs(){
+    let data = JSON.parse(await readFile("output/activity.json"))
+    // console.log('data', data);
+
+    for (let i = 0; i < data.length; i++) {
+        console.log('downloadImg i=', i);
+        let rootDir = './img';
+        if(!fs.existsSync(rootDir)) fs.mkdirSync(rootDir);
+
+        let keyword = './img/' + 'event';
+        if(!fs.existsSync(keyword)) fs.mkdirSync(keyword);
+
+        let picsDir = './img/event/'+ data[i].name.replace(/\//g,"");
+        if(!fs.existsSync(picsDir)) fs.mkdirSync(picsDir);
+
+        for(let picNum = 0; picNum < data[i].pics.length; picNum++){
+            const url = data[i].pics[picNum];
+            const filename = picsDir + '/' + picNum +'.jpg';
+            await downloadEachPic(url, filename);
+
+        }
+    }
+}
+
+const downloadEachPic = (url, filename)=>{
+    axios({
+        url,
+        responseType: "stream"
+    }).then(response => 
+        new Promise((resolve, reject) => {
+            response.data.pipe(fs.createWriteStream(filename))
+            .on("finish", ()=>resolve())
+            .on("error", e=>reject(e))
+        })
+    )
+}
 
 async function writeJson () {
     if (!fs.existsSync("output")) {
@@ -180,7 +226,8 @@ async function asyncArray(functionList) {
 }
 ``
 try {
-    asyncArray([searchKeyword, parseHtml, getData, close]).then(async()=>{console.log('Done.')});
+    // asyncArray([searchKeyword, parseHtml, getData, close]).then(async()=>{console.log('Done.')});
+    asyncArray([downloadImgs]).then(async()=>{console.log('Done.')});
 } catch(err) {
     console.log('err:', err)
 }
