@@ -111,11 +111,11 @@ async function parseDetail (url) {
         })
 
         let picsInside = $(html2).find(".Carousel__ProductSlideImg-sc-17ibooh-5").eq(i).attr('src');
-        console.log('picsInside', picsInside)
+        console.log('picsInside', "https:" + picsInside)
 
 
         if (picsInside != undefined){
-        picsArray.push(picsInside)
+        picsArray.push("https:" + picsInside)
         console.log('picsArray', picsArray);
         }
     }
